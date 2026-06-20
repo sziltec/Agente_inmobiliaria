@@ -1,0 +1,124 @@
+// Esquema de la base de datos del Agente Inmobiliario.
+// Cada "model" es una tabla. Si cambias algo aquí, ejecuta:
+//   npx prisma migrate dev --name <descripcion-del-cambio>
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  // Conexión "pooler" (la usa la app en producción/Vercel).
+  url       = env("DATABASE_URL")
+  // Conexión directa (la usa Prisma para crear/migrar tablas).
+  directUrl = env("DIRECT_URL")
+}
+
+// Canales de mensajería soportados (todos de Meta).
+enum Channel {
+  WHATSAPP
+  MESSENGER
+  INSTAGRAM
+}
+
+// Dirección de un mensaje respecto a nuestro sistema.
+enum Direction {
+  INBOUND // del cliente hacia nosotros
+  OUTBOUND // de nosotros (o el agente IA) hacia el cliente
+}
+
+// Estado de cualificación de un lead.
+enum LeadStatus {
+  NEW // recién entró, sin datos aún
+  QUALIFYING // el agente está recolectando datos
+  QUALIFIED // lead con datos completos y con intención real
+  DISQUALIFIED // no encaja (sin presupuesto, fuera de zona, spam...)
+}
+
+// Tipo de operación inmobiliaria.
+enum Operation {
+  BUY
+  RENT
+}
+
+// Un cliente potencial. Se crea/actualiza a medida que el agente lo cualifica.
+model Lead {
+  id           String      @id @default(cuid())
+  channel      Channel
+  // Identificador del usuario en la plataforma (teléfono de WhatsApp, id de IG/Messenger).
+  externalId   String
+  name         String?
+  phone        String?
+  email        String?
+  status       LeadStatus  @default(NEW)
+  // Datos de cualificación
+  operation    Operation?
+  propertyType String? // casa, departamento, terreno, local...
+  zone         String? // zona / barrio / ciudad de interés
+  budgetMin    Int?
+  budgetMax    Int?
+  bedrooms     Int?
+  timeline     String? // "en 1 mes", "explorando", etc.
+  notes        String? // resumen libre del agente
+  // Para exportar a un CRM en el futuro
+  exportedToCrm Boolean    @default(false)
+  createdAt    DateTime    @default(now())
+  updatedAt    DateTime    @updatedAt
+
+  conversations Conversation[]
+
+  @@unique([channel, externalId])
+  @@index([status])
+}
+
+// Un hilo de conversación con un usuario en un canal concreto.
+model Conversation {
+  id             String    @id @default(cuid())
+  channel        Channel
+  externalUserId String // mismo valor que Lead.externalId
+  lead           Lead?     @relation(fields: [leadId], references: [id])
+  leadId         String?
+  status         String    @default("open") // "open" | "closed"
+  lastMessageAt  DateTime  @default(now())
+  createdAt      DateTime  @default(now())
+
+  messages Message[]
+  events   Event[]
+
+  @@unique([channel, externalUserId])
+  @@index([channel])
+  @@index([lastMessageAt])
+}
+
+// Cada mensaje individual de una conversación.
+model Message {
+  id             String       @id @default(cuid())
+  conversation   Conversation @relation(fields: [conversationId], references: [id])
+  conversationId String
+  direction      Direction
+  content        String       @db.Text
+  // Id del mensaje en la plataforma (WhatsApp/Meta). Sirve para no procesar
+  // dos veces el mismo mensaje si Meta lo reenvía.
+  providerMessageId String?   @unique
+  // Carga útil original del webhook (por si necesitamos depurar).
+  raw            Json?
+  createdAt      DateTime     @default(now())
+
+  @@index([conversationId])
+}
+
+// Eventos para alimentar el dashboard de estadísticas.
+// Ej: "chat_opened", "message_received", "lead_qualified".
+model Event {
+  id             String        @id @default(cuid())
+  type           String
+  channel        Channel
+  conversation   Conversation? @relation(fields: [conversationId], references: [id])
+  conversationId String?
+  metadata       Json?
+  createdAt      DateTime      @default(now())
+
+  @@index([type])
+  @@index([channel])
+  @@index([createdAt])
+}
