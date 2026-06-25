@@ -33,16 +33,26 @@ function clean(input: Record<string, unknown>): Partial<LeadData> {
   return out as Partial<LeadData>;
 }
 
+// Tope de vueltas de herramienta dentro de un mismo turno. Gemini a veces no
+// termina nunca de encadenar llamadas a la herramienta sin texto final; sin
+// este límite el bucle puede correr hasta que el serverless function de
+// Vercel mate la ejecución, perdiendo la respuesta entera.
+const MAX_TOOL_ROUNDS = 5;
+
 export async function runAgentTurn({
   messages,
   lead,
 }: AgentTurnInput): Promise<AgentTurnResult> {
   const convo: ChatMessage[] = [...messages];
   let leadData: LeadData = { ...lead };
+  // Gemini puede mandar el texto de respuesta en el MISMO mensaje que ya trae
+  // tool_calls (a diferencia del flujo clásico de OpenAI). Si no lo
+  // guardamos, se pierde apenas el bucle sigue a la siguiente vuelta.
+  let lastContent = "";
 
   // Bucle: si el modelo usa la herramienta, aplicamos los datos y le devolvemos
   // el resultado para que continúe hasta dar su respuesta final.
-  while (true) {
+  for (let round = 0; round < MAX_TOOL_ROUNDS; round++) {
     const res = await getLLM().chat.completions.create({
       model: MODEL,
       max_tokens: 1024,
@@ -55,6 +65,7 @@ export async function runAgentTurn({
 
     const msg = res.choices[0].message;
     convo.push(msg);
+    if (msg.content) lastContent = msg.content;
 
     if (msg.tool_calls && msg.tool_calls.length > 0) {
       for (const tc of msg.tool_calls) {
@@ -76,7 +87,12 @@ export async function runAgentTurn({
     }
 
     // Respuesta final de texto.
-    const reply = (msg.content || "").trim();
+    const reply = (msg.content || lastContent).trim();
     return { reply, lead: leadData, messages: convo };
   }
+
+  // Se acabaron las vueltas sin una respuesta "final" sin tool_calls: usamos
+  // el último texto que el modelo haya mandado, aunque haya venido junto a
+  // una llamada a la herramienta.
+  return { reply: lastContent.trim(), lead: leadData, messages: convo };
 }
