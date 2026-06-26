@@ -14,6 +14,7 @@ import { LeadSearch } from "@/components/lead-search";
 import type { NotificationItem } from "@/components/notifications-bell";
 import {
   Card,
+  CardAction,
   CardContent,
   CardHeader,
   CardTitle,
@@ -122,11 +123,13 @@ export default async function Dashboard({
         {/* Bandeja de conversaciones + actividad */}
         <div className="grid grid-cols-1 gap-6 lg:grid-cols-[1fr_320px]">
           <Card>
-            <CardHeader className="flex-row items-center justify-between">
+            <CardHeader>
               <CardTitle>Conversaciones recientes</CardTitle>
-              <Suspense>
-                <LeadSearch />
-              </Suspense>
+              <CardAction>
+                <Suspense>
+                  <LeadSearch />
+                </Suspense>
+              </CardAction>
             </CardHeader>
             <CardContent>
               {stats.recentConversations.length === 0 ? (
