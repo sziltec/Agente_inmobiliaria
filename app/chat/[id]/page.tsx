@@ -1,7 +1,11 @@
 // Página de detalle de una conversación.
 import Link from "next/link";
+import { ArrowLeft } from "lucide-react";
 import { getConversation } from "@/lib/stats";
 import { notFound } from "next/navigation";
+import { Badge } from "@/components/ui/badge";
+import { SidebarTrigger } from "@/components/ui/sidebar";
+import { Separator } from "@/components/ui/separator";
 
 export default async function ChatDetail({
   params,
@@ -29,99 +33,107 @@ export default async function ChatDetail({
   };
 
   return (
-    <div className="min-h-screen bg-slate-50">
-      {/* Header */}
-      <div className="border-b border-slate-200 bg-white p-4">
-        <div className="mx-auto max-w-2xl flex items-center justify-between">
+    <>
+      <header className="flex h-14 shrink-0 items-center gap-2 border-b px-4">
+        <SidebarTrigger />
+        <Separator orientation="vertical" className="h-5" />
+        <Link
+          href="/"
+          className="flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground"
+        >
+          <ArrowLeft className="size-4" />
+          Volver
+        </Link>
+      </header>
+
+      <div className="flex flex-1 flex-col">
+        {/* Encabezado del lead */}
+        <div className="flex items-center justify-between border-b px-6 py-4">
           <div>
-            <Link href="/" className="text-blue-600 hover:text-blue-800 text-sm">
-              ← Volver
-            </Link>
-            <h1 className="text-2xl font-bold text-slate-900 mt-2">
+            <h1 className="text-xl font-semibold">
               {conv.lead?.name || "Sin nombre"}
             </h1>
-            <div className="text-sm text-slate-600 mt-1">
-              <span className="rounded-full bg-blue-100 px-2 py-0.5 text-xs font-medium text-blue-800 mr-2">
+            <div className="mt-1 flex items-center gap-2">
+              <Badge variant="secondary">
                 {channelNames[conv.channel] || conv.channel}
-              </span>
-              <span
-                className={`rounded-full px-2 py-0.5 text-xs font-medium ${
+              </Badge>
+              <Badge
+                variant={
+                  conv.lead?.status === "QUALIFIED" ||
+                  conv.lead?.status === "DISQUALIFIED"
+                    ? "default"
+                    : "secondary"
+                }
+                className={
                   conv.lead?.status === "QUALIFIED"
-                    ? "bg-green-100 text-green-800"
+                    ? "bg-primary text-primary-foreground"
                     : conv.lead?.status === "DISQUALIFIED"
-                      ? "bg-red-100 text-red-800"
-                      : "bg-yellow-100 text-yellow-800"
-                }`}
+                      ? "bg-destructive text-white"
+                      : undefined
+                }
               >
                 {statusNames[conv.lead?.status || "NEW"] || "Nuevo"}
-              </span>
+              </Badge>
             </div>
           </div>
 
-          {/* Info del lead */}
           {conv.lead && (
-            <div className="text-right text-sm text-slate-600">
+            <div className="text-right text-sm text-muted-foreground">
               {conv.lead.email && <div>{conv.lead.email}</div>}
               {conv.lead.phone && <div>{conv.lead.phone}</div>}
-              <div className="mt-2">
-                <span className="text-xs">
-                  {conv.lead.operation && (
-                    <>
-                      {conv.lead.operation === "BUY"
-                        ? "Compra"
-                        : "Alquiler"}
-                      {conv.lead.propertyType && ` • ${conv.lead.propertyType}`}
-                      {conv.lead.zone && ` • ${conv.lead.zone}`}
-                    </>
-                  )}
-                </span>
-              </div>
+              {conv.lead.operation && (
+                <div className="mt-1 text-xs">
+                  {conv.lead.operation === "BUY" ? "Compra" : "Alquiler"}
+                  {conv.lead.propertyType && ` • ${conv.lead.propertyType}`}
+                  {conv.lead.zone && ` • ${conv.lead.zone}`}
+                </div>
+              )}
             </div>
           )}
         </div>
-      </div>
 
-      {/* Conversación */}
-      <div className="mx-auto max-w-2xl p-4 py-8">
-        <div className="space-y-4">
-          {conv.messages.map((msg) => (
-            <div
-              key={msg.id}
-              className={`flex ${
-                msg.direction === "INBOUND" ? "justify-start" : "justify-end"
-              }`}
-            >
+        {/* Conversación */}
+        <div className="mx-auto w-full max-w-2xl flex-1 p-4 py-8">
+          <div className="space-y-4">
+            {conv.messages.map((msg) => (
               <div
-                className={`max-w-xs px-4 py-2 rounded-lg ${
-                  msg.direction === "INBOUND"
-                    ? "bg-slate-100 text-slate-900"
-                    : "bg-blue-500 text-white"
+                key={msg.id}
+                className={`flex ${
+                  msg.direction === "INBOUND" ? "justify-start" : "justify-end"
                 }`}
               >
-                <p className="text-sm">{msg.content}</p>
-                <p
-                  className={`text-xs mt-1 ${
+                <div
+                  className={`max-w-xs rounded-lg px-4 py-2 ${
                     msg.direction === "INBOUND"
-                      ? "text-slate-600"
-                      : "text-blue-100"
+                      ? "bg-muted text-foreground"
+                      : "bg-primary text-primary-foreground"
                   }`}
                 >
-                  {msg.createdAt.toLocaleTimeString("es-ES", {
-                    hour: "2-digit",
-                    minute: "2-digit",
-                  })}
-                </p>
+                  <p className="text-sm">{msg.content}</p>
+                  <p
+                    className={`mt-1 text-xs ${
+                      msg.direction === "INBOUND"
+                        ? "text-muted-foreground"
+                        : "text-primary-foreground/70"
+                    }`}
+                  >
+                    {msg.createdAt.toLocaleTimeString("es-ES", {
+                      hour: "2-digit",
+                      minute: "2-digit",
+                    })}
+                  </p>
+                </div>
               </div>
-            </div>
-          ))}
-        </div>
+            ))}
+          </div>
 
-        {conv.messages.length === 0 && (
-          <p className="text-center text-slate-600 mt-8">
-            No hay mensajes en esta conversación.
-          </p>
-        )}
+          {conv.messages.length === 0 && (
+            <p className="mt-8 text-center text-muted-foreground">
+              No hay mensajes en esta conversación.
+            </p>
+          )}
+        </div>
       </div>
-    </div>
+    </>
   );
 }
