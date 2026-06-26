@@ -5,7 +5,6 @@ import "./globals.css";
 import { AppSidebar } from "@/components/app-sidebar";
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 import { TooltipProvider } from "@/components/ui/tooltip";
-import { getChannelCounts } from "@/lib/stats";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -22,13 +21,11 @@ export const metadata: Metadata = {
   description: "Dashboard de leads y estadísticas",
 };
 
-export default async function RootLayout({
+export default function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const channelCounts = await getChannelCounts();
-
   return (
     <html
       lang="es"
@@ -38,7 +35,7 @@ export default async function RootLayout({
         <TooltipProvider>
           <SidebarProvider>
             <Suspense fallback={null}>
-              <AppSidebar channelCounts={channelCounts} />
+              <AppSidebar />
             </Suspense>
             <SidebarInset>{children}</SidebarInset>
           </SidebarProvider>

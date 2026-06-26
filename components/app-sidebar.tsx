@@ -1,15 +1,14 @@
 "use client";
 
-// Barra lateral de navegación: resumen general + accesos por canal.
+// Barra lateral de navegación: resumen, propiedades, prospectos y mensajes.
 //
 // Usamos <a> nativo (no next/link) para los links de este sidebar: en esta
 // versión de Next.js, un <Link> dentro del layout raíz (persistente entre
 // navegaciones) no completa la transición del lado del cliente. Con <a>
 // nativo la navegación es una recarga completa de página, pero funciona de
 // forma confiable.
-import { usePathname, useSearchParams } from "next/navigation";
-import { Building2, House, LayoutDashboard, Users } from "lucide-react";
-import { SiWhatsapp, SiMessenger, SiInstagram } from "react-icons/si";
+import { usePathname } from "next/navigation";
+import { Building2, House, LayoutDashboard, MessageSquare, Users } from "lucide-react";
 import {
   Sidebar,
   SidebarContent,
@@ -18,25 +17,12 @@ import {
   SidebarGroupLabel,
   SidebarHeader,
   SidebarMenu,
-  SidebarMenuBadge,
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
 
-const channelLinks = [
-  { channel: "WHATSAPP", label: "WhatsApp", icon: SiWhatsapp },
-  { channel: "MESSENGER", label: "Messenger", icon: SiMessenger },
-  { channel: "INSTAGRAM", label: "Instagram", icon: SiInstagram },
-];
-
-export function AppSidebar({
-  channelCounts,
-}: {
-  channelCounts: Record<string, number>;
-}) {
+export function AppSidebar() {
   const pathname = usePathname();
-  const searchParams = useSearchParams();
-  const activeChannel = searchParams.get("channel");
 
   return (
     <Sidebar collapsible="icon">
@@ -62,7 +48,7 @@ export function AppSidebar({
                 <SidebarMenuButton
                   // eslint-disable-next-line @next/next/no-html-link-for-pages -- ver comentario arriba
                   render={<a href="/" />}
-                  isActive={pathname === "/" && !activeChannel}
+                  isActive={pathname === "/"}
                 >
                   <LayoutDashboard />
                   <span>Resumen</span>
@@ -87,28 +73,16 @@ export function AppSidebar({
                   <span>Prospectos</span>
                 </SidebarMenuButton>
               </SidebarMenuItem>
-            </SidebarMenu>
-          </SidebarGroupContent>
-        </SidebarGroup>
-
-        <SidebarGroup>
-          <SidebarGroupLabel>Canales</SidebarGroupLabel>
-          <SidebarGroupContent>
-            <SidebarMenu>
-              {channelLinks.map(({ channel, label, icon: Icon }) => (
-                <SidebarMenuItem key={channel}>
-                  <SidebarMenuButton
-                    render={<a href={`/?channel=${channel}`} />}
-                    isActive={pathname === "/" && activeChannel === channel}
-                  >
-                    <Icon />
-                    <span>{label}</span>
-                  </SidebarMenuButton>
-                  {channelCounts[channel] ? (
-                    <SidebarMenuBadge>{channelCounts[channel]}</SidebarMenuBadge>
-                  ) : null}
-                </SidebarMenuItem>
-              ))}
+              <SidebarMenuItem>
+                <SidebarMenuButton
+                  // eslint-disable-next-line @next/next/no-html-link-for-pages -- ver comentario arriba
+                  render={<a href="/messages" />}
+                  isActive={pathname.startsWith("/messages")}
+                >
+                  <MessageSquare />
+                  <span>Mensajes</span>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>

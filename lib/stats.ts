@@ -31,13 +31,6 @@ async function getMessagesPerDay(channel?: Channel) {
   return Array.from(buckets.entries()).map(([date, count]) => ({ date, count }));
 }
 
-// Conteo de chats por canal, usado para las badges del sidebar (consulta
-// liviana, se corre en el layout en cada página).
-export async function getChannelCounts(): Promise<Record<string, number>> {
-  const counts = await db.conversation.groupBy({ by: ["channel"], _count: true });
-  return Object.fromEntries(counts.map((c) => [c.channel, c._count]));
-}
-
 // `channel` es opcional: si se pasa, filtra todo el dashboard a ese canal
 // (lo usa la navegación del sidebar). `search` filtra la bandeja de
 // conversaciones por nombre, teléfono o email del lead.
@@ -130,17 +123,4 @@ export async function getStats(channel?: Channel, search?: string) {
     recentEvents,
     messagesPerDay,
   };
-}
-
-// Obtener detalle de una conversación (todos sus mensajes).
-export async function getConversation(conversationId: string) {
-  return db.conversation.findUnique({
-    where: { id: conversationId },
-    include: {
-      lead: true,
-      messages: {
-        orderBy: { createdAt: "asc" },
-      },
-    },
-  });
 }

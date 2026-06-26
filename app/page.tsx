@@ -188,7 +188,7 @@ export default async function Dashboard({
                           </TableCell>
                           <TableCell className="text-right">
                             <Link
-                              href={`/chat/${conv.id}`}
+                              href={`/messages/${conv.id}`}
                               className="font-medium text-primary hover:underline"
                             >
                               Ver →

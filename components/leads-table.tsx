@@ -222,7 +222,7 @@ const columns: ColumnDef<LeadRow>[] = [
               </DropdownMenuItem>
             )}
             {lead.conversationId && (
-              <DropdownMenuItem render={<Link href={`/chat/${lead.conversationId}`} />}>
+              <DropdownMenuItem render={<Link href={`/messages/${lead.conversationId}`} />}>
                 Ver conversación
               </DropdownMenuItem>
             )}
