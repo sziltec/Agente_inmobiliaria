@@ -1,9 +1,10 @@
 // Crea el bucket de Supabase Storage para las fotos de propiedades, si no
 // existe. Solo hace falta correrlo una vez por proyecto de Supabase:
 //   npx tsx --env-file=.env scripts/setup-storage.ts
-import { supabaseAdmin, PROPERTIES_BUCKET } from "../lib/supabase";
+import { getSupabaseAdmin, PROPERTIES_BUCKET } from "../lib/supabase";
 
 async function main() {
+  const supabaseAdmin = getSupabaseAdmin();
   const { data: buckets, error: listError } = await supabaseAdmin.storage.listBuckets();
   if (listError) throw listError;
 

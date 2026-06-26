@@ -6,7 +6,7 @@ import { randomUUID } from "node:crypto";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { db } from "@/lib/db";
-import { supabaseAdmin, PROPERTIES_BUCKET } from "@/lib/supabase";
+import { getSupabaseAdmin, PROPERTIES_BUCKET } from "@/lib/supabase";
 
 export type CreatePropertyState = { error?: string };
 
@@ -39,6 +39,7 @@ export async function createProperty(
     return { error: "Subí una foto de portada." };
   }
 
+  const supabaseAdmin = getSupabaseAdmin();
   const ext = photo.name.split(".").pop() || "jpg";
   const path = `${randomUUID()}.${ext}`;
   const { error: uploadError } = await supabaseAdmin.storage
