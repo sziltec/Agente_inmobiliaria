@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { Suspense } from "react";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { AppSidebar } from "@/components/app-sidebar";
@@ -36,7 +37,9 @@ export default async function RootLayout({
       <body className="min-h-full">
         <TooltipProvider>
           <SidebarProvider>
-            <AppSidebar channelCounts={channelCounts} />
+            <Suspense fallback={null}>
+              <AppSidebar channelCounts={channelCounts} />
+            </Suspense>
             <SidebarInset>{children}</SidebarInset>
           </SidebarProvider>
         </TooltipProvider>
