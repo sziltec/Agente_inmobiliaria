@@ -1,5 +1,6 @@
 // Dashboard principal: estadísticas y bandeja de chats.
 import Link from "next/link";
+import { Suspense } from "react";
 import { Inbox, BadgeCheck } from "lucide-react";
 import { SiWhatsapp, SiMessenger, SiInstagram } from "react-icons/si";
 import { getStats } from "@/lib/stats";
@@ -9,6 +10,7 @@ import { StatCard } from "@/components/stat-card";
 import { LeadsDonutChart } from "@/components/leads-donut-chart";
 import { MessagesAreaChart } from "@/components/messages-area-chart";
 import { ActivityFeed } from "@/components/activity-feed";
+import { LeadSearch } from "@/components/lead-search";
 import type { NotificationItem } from "@/components/notifications-bell";
 import {
   Card,
@@ -54,14 +56,14 @@ function MessengerInstagramIcon({ className }: { className?: string }) {
 export default async function Dashboard({
   searchParams,
 }: {
-  searchParams: Promise<{ channel?: string }>;
+  searchParams: Promise<{ channel?: string; q?: string }>;
 }) {
-  const { channel: rawChannel } = await searchParams;
+  const { channel: rawChannel, q: search } = await searchParams;
   const channel = validChannels.includes(rawChannel as ValidChannel)
     ? (rawChannel as ValidChannel)
     : undefined;
 
-  const stats = await getStats(channel);
+  const stats = await getStats(channel, search);
 
   const notifications: NotificationItem[] = stats.recentEvents.map((e) => ({
     id: e.id,
@@ -120,14 +122,18 @@ export default async function Dashboard({
         {/* Bandeja de conversaciones + actividad */}
         <div className="grid grid-cols-1 gap-6 lg:grid-cols-[1fr_320px]">
           <Card>
-            <CardHeader>
+            <CardHeader className="flex-row items-center justify-between">
               <CardTitle>Conversaciones recientes</CardTitle>
+              <Suspense>
+                <LeadSearch />
+              </Suspense>
             </CardHeader>
             <CardContent>
               {stats.recentConversations.length === 0 ? (
                 <p className="text-sm text-muted-foreground">
-                  No hay conversaciones aún. Cuando recibas mensajes,
-                  aparecerán aquí.
+                  {search
+                    ? `No encontramos ningún lead que coincida con "${search}".`
+                    : "No hay conversaciones aún. Cuando recibas mensajes, aparecerán aquí."}
                 </p>
               ) : (
                 <Table>

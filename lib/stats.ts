@@ -39,58 +39,76 @@ export async function getChannelCounts(): Promise<Record<string, number>> {
 }
 
 // `channel` es opcional: si se pasa, filtra todo el dashboard a ese canal
-// (lo usa la navegación del sidebar). Sin canal, muestra el total general.
-export async function getStats(channel?: Channel) {
+// (lo usa la navegación del sidebar). `search` filtra la bandeja de
+// conversaciones por nombre, teléfono o email del lead.
+export async function getStats(channel?: Channel, search?: string) {
   const whereChannel = channel ? { channel } : {};
 
-  // Total de chats por canal (sin filtrar, alimenta los contadores del sidebar).
-  const chatsByChannel = await db.conversation.groupBy({
-    by: ["channel"],
-    _count: true,
-  });
+  const whereLeadSearch = search
+    ? {
+        lead: {
+          OR: [
+            { name: { contains: search, mode: "insensitive" as const } },
+            { phone: { contains: search } },
+            { email: { contains: search, mode: "insensitive" as const } },
+          ],
+        },
+      }
+    : {};
 
-  // Total de leads cualificados.
-  const qualifiedLeads = await db.lead.count({
-    where: { status: "QUALIFIED", ...whereChannel },
-  });
+  // Todas las consultas son independientes entre sí: se corren en paralelo
+  // en vez de una por una, para no acumular la latencia de red hacia la
+  // base de datos en cada round-trip.
+  const [
+    chatsByChannel,
+    qualifiedLeads,
+    totalChats,
+    leadsByStatus,
+    recentConversations,
+    recentEvents,
+    messagesPerDay,
+  ] = await Promise.all([
+    // Total de chats por canal (sin filtrar, alimenta los contadores del sidebar).
+    db.conversation.groupBy({ by: ["channel"], _count: true }),
 
-  // Total de chats abiertos (según el filtro de canal).
-  const totalChats = await db.conversation.count({ where: whereChannel });
+    // Total de leads cualificados.
+    db.lead.count({ where: { status: "QUALIFIED", ...whereChannel } }),
 
-  // Leads por estado.
-  const leadsByStatus = await db.lead.groupBy({
-    by: ["status"],
-    _count: true,
-    where: whereChannel,
-  });
+    // Total de chats abiertos (según el filtro de canal).
+    db.conversation.count({ where: whereChannel }),
 
-  // Últimas conversaciones (últimas 10).
-  const recentConversations = await db.conversation.findMany({
-    where: whereChannel,
-    orderBy: { lastMessageAt: "desc" },
-    take: 10,
-    include: {
-      lead: {
-        select: { id: true, name: true, email: true, phone: true, status: true },
+    // Leads por estado.
+    db.lead.groupBy({ by: ["status"], _count: true, where: whereChannel }),
+
+    // Últimas conversaciones (últimas 10, o las primeras 50 que coincidan
+    // con la búsqueda).
+    db.conversation.findMany({
+      where: { ...whereChannel, ...whereLeadSearch },
+      orderBy: { lastMessageAt: "desc" },
+      take: search ? 50 : 10,
+      include: {
+        lead: {
+          select: { id: true, name: true, email: true, phone: true, status: true },
+        },
+        messages: {
+          orderBy: { createdAt: "desc" },
+          take: 1,
+        },
       },
-      messages: {
-        orderBy: { createdAt: "desc" },
-        take: 1,
+    }),
+
+    // Últimos eventos (para el panel de notificaciones/actividad).
+    db.event.findMany({
+      where: whereChannel,
+      orderBy: { createdAt: "desc" },
+      take: 8,
+      include: {
+        conversation: { include: { lead: { select: { name: true } } } },
       },
-    },
-  });
+    }),
 
-  // Últimos eventos (para el panel de notificaciones/actividad).
-  const recentEvents = await db.event.findMany({
-    where: whereChannel,
-    orderBy: { createdAt: "desc" },
-    take: 8,
-    include: {
-      conversation: { include: { lead: { select: { name: true } } } },
-    },
-  });
-
-  const messagesPerDay = await getMessagesPerDay(channel);
+    getMessagesPerDay(channel),
+  ]);
 
   return {
     chatsByChannel: Object.fromEntries(
