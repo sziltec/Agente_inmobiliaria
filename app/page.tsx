@@ -11,6 +11,7 @@ import { LeadsDonutChart } from "@/components/leads-donut-chart";
 import { MessagesAreaChart } from "@/components/messages-area-chart";
 import { ActivityFeed } from "@/components/activity-feed";
 import { LeadSearch } from "@/components/lead-search";
+import { LeadAvatar } from "@/components/lead-avatar";
 import type { NotificationItem } from "@/components/notifications-bell";
 import {
   Card,
@@ -158,11 +159,20 @@ export default async function Dashboard({
                       return (
                         <TableRow key={conv.id}>
                           <TableCell>
-                            <div className="font-medium">
-                              {conv.lead?.name || "Sin nombre"}
-                            </div>
-                            <div className="text-xs text-muted-foreground">
-                              {conv.lead?.email || conv.lead?.phone || "Sin contacto"}
+                            <div className="flex items-center gap-3">
+                              <LeadAvatar
+                                name={conv.lead?.name}
+                                avatarUrl={conv.lead?.avatarUrl}
+                                channel={conv.channel}
+                              />
+                              <div>
+                                <div className="font-medium">
+                                  {conv.lead?.name || "Sin nombre"}
+                                </div>
+                                <div className="text-xs text-muted-foreground">
+                                  {conv.lead?.email || conv.lead?.phone || "Sin contacto"}
+                                </div>
+                              </div>
                             </div>
                           </TableCell>
                           <TableCell>

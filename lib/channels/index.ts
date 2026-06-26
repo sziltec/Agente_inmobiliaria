@@ -1,11 +1,14 @@
 // Registro de canales: dado un canal, devuelve cómo enviar mensajes por él.
-// Messenger e Instagram se añadirán aquí en la Fase 4.
 import type { Channel } from "@prisma/client";
 import type { ChannelAdapter } from "./types";
 import { whatsappAdapter } from "./whatsapp";
+import { messengerAdapter } from "./messenger";
+import { instagramAdapter } from "./instagram";
 
 const adapters: Partial<Record<Channel, ChannelAdapter>> = {
   WHATSAPP: whatsappAdapter,
+  MESSENGER: messengerAdapter,
+  INSTAGRAM: instagramAdapter,
 };
 
 export function getAdapter(channel: Channel): ChannelAdapter {

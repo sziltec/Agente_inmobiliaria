@@ -24,6 +24,22 @@ export async function handleInboundMessage(msg: NormalizedMessage): Promise<void
     },
   });
 
+  // --- 1.5 Foto de perfil: si todavía no la tenemos, la pedimos una sola
+  // vez (Messenger/Instagram la dan vía Graph API; WhatsApp no la expone).
+  if (!lead.avatarUrl) {
+    const profile = await getAdapter(msg.channel).fetchProfile?.(msg.externalUserId);
+    if (profile?.name || profile?.avatarUrl) {
+      await db.lead.update({
+        where: { id: lead.id },
+        data: {
+          name: lead.name ?? profile.name,
+          avatarUrl: profile.avatarUrl,
+        },
+      });
+      if (!lead.name && profile.name) lead.name = profile.name;
+    }
+  }
+
   // --- 2. Conversación: crear o recuperar (y detectar si es nueva) ---
   const existing = await db.conversation.findUnique({
     where: {

@@ -88,7 +88,14 @@ export async function getStats(channel?: Channel, search?: string) {
       take: search ? 50 : 10,
       include: {
         lead: {
-          select: { id: true, name: true, email: true, phone: true, status: true },
+          select: {
+            id: true,
+            name: true,
+            email: true,
+            phone: true,
+            status: true,
+            avatarUrl: true,
+          },
         },
         messages: {
           orderBy: { createdAt: "desc" },

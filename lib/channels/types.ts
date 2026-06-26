@@ -19,4 +19,9 @@ export type NormalizedMessage = {
 // Cada canal sabe cómo ENVIAR un mensaje de texto a un usuario.
 export type ChannelAdapter = {
   send(to: string, text: string): Promise<void>;
+  // Opcional: nombre y foto de perfil del usuario. No todos los canales lo
+  // permiten (WhatsApp Cloud API no expone esta info por privacidad).
+  fetchProfile?(
+    externalUserId: string,
+  ): Promise<{ name?: string; avatarUrl?: string }>;
 };

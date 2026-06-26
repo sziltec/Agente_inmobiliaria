@@ -52,6 +52,9 @@ export function parseWhatsAppWebhook(body: unknown): NormalizedMessage[] {
   return result;
 }
 
+// Nota: no implementamos fetchProfile aquí. La Cloud API de WhatsApp no
+// expone la foto de perfil del contacto (Meta la bloquea por privacidad),
+// así que para este canal el lead se queda solo con sus iniciales.
 export const whatsappAdapter: ChannelAdapter = {
   async send(to, text) {
     const token = process.env.WHATSAPP_ACCESS_TOKEN;

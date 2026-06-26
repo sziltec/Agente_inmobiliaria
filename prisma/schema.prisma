@@ -48,6 +48,9 @@ model Lead {
   // Identificador del usuario en la plataforma (teléfono de WhatsApp, id de IG/Messenger).
   externalId   String
   name         String?
+  // Foto de perfil del lead en su red de origen (Messenger/Instagram la dan
+  // por la Graph API; WhatsApp Cloud API no expone fotos por privacidad).
+  avatarUrl    String?
   phone        String?
   email        String?
   status       LeadStatus  @default(NEW)

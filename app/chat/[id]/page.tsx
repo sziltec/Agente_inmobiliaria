@@ -6,6 +6,7 @@ import { notFound } from "next/navigation";
 import { Badge } from "@/components/ui/badge";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { Separator } from "@/components/ui/separator";
+import { LeadAvatar } from "@/components/lead-avatar";
 
 export default async function ChatDetail({
   params,
@@ -49,31 +50,39 @@ export default async function ChatDetail({
       <div className="flex flex-1 flex-col">
         {/* Encabezado del lead */}
         <div className="flex items-center justify-between border-b px-6 py-4">
-          <div>
-            <h1 className="text-xl font-semibold">
-              {conv.lead?.name || "Sin nombre"}
-            </h1>
-            <div className="mt-1 flex items-center gap-2">
-              <Badge variant="secondary">
-                {channelNames[conv.channel] || conv.channel}
-              </Badge>
-              <Badge
-                variant={
-                  conv.lead?.status === "QUALIFIED" ||
-                  conv.lead?.status === "DISQUALIFIED"
-                    ? "default"
-                    : "secondary"
-                }
-                className={
-                  conv.lead?.status === "QUALIFIED"
-                    ? "bg-primary text-primary-foreground"
-                    : conv.lead?.status === "DISQUALIFIED"
-                      ? "bg-destructive text-white"
-                      : undefined
-                }
-              >
-                {statusNames[conv.lead?.status || "NEW"] || "Nuevo"}
-              </Badge>
+          <div className="flex items-center gap-3">
+            <LeadAvatar
+              name={conv.lead?.name}
+              avatarUrl={conv.lead?.avatarUrl}
+              channel={conv.channel}
+              size="lg"
+            />
+            <div>
+              <h1 className="text-xl font-semibold">
+                {conv.lead?.name || "Sin nombre"}
+              </h1>
+              <div className="mt-1 flex items-center gap-2">
+                <Badge variant="secondary">
+                  {channelNames[conv.channel] || conv.channel}
+                </Badge>
+                <Badge
+                  variant={
+                    conv.lead?.status === "QUALIFIED" ||
+                    conv.lead?.status === "DISQUALIFIED"
+                      ? "default"
+                      : "secondary"
+                  }
+                  className={
+                    conv.lead?.status === "QUALIFIED"
+                      ? "bg-primary text-primary-foreground"
+                      : conv.lead?.status === "DISQUALIFIED"
+                        ? "bg-destructive text-white"
+                        : undefined
+                  }
+                >
+                  {statusNames[conv.lead?.status || "NEW"] || "Nuevo"}
+                </Badge>
+              </div>
             </div>
           </div>
 
