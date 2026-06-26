@@ -1,9 +1,14 @@
 "use client";
 
 // Barra lateral de navegación: resumen general + accesos por canal.
-import Link from "next/link";
+//
+// Usamos <a> nativo (no next/link) para los links de este sidebar: en esta
+// versión de Next.js, un <Link> dentro del layout raíz (persistente entre
+// navegaciones) no completa la transición del lado del cliente. Con <a>
+// nativo la navegación es una recarga completa de página, pero funciona de
+// forma confiable.
 import { usePathname, useSearchParams } from "next/navigation";
-import { House, LayoutDashboard } from "lucide-react";
+import { Building2, House, LayoutDashboard } from "lucide-react";
 import { SiWhatsapp, SiMessenger, SiInstagram } from "react-icons/si";
 import {
   Sidebar,
@@ -38,7 +43,8 @@ export function AppSidebar({
       <SidebarHeader>
         <SidebarMenu>
           <SidebarMenuItem>
-            <SidebarMenuButton size="lg" render={<Link href="/" />}>
+            {/* eslint-disable-next-line @next/next/no-html-link-for-pages -- ver comentario arriba */}
+            <SidebarMenuButton size="lg" render={<a href="/" />}>
               <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-primary text-primary-foreground">
                 <House className="size-4" />
               </div>
@@ -54,11 +60,22 @@ export function AppSidebar({
             <SidebarMenu>
               <SidebarMenuItem>
                 <SidebarMenuButton
-                  render={<Link href="/" />}
+                  // eslint-disable-next-line @next/next/no-html-link-for-pages -- ver comentario arriba
+                  render={<a href="/" />}
                   isActive={pathname === "/" && !activeChannel}
                 >
                   <LayoutDashboard />
                   <span>Resumen</span>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+              <SidebarMenuItem>
+                <SidebarMenuButton
+                  // eslint-disable-next-line @next/next/no-html-link-for-pages -- ver comentario arriba
+                  render={<a href="/properties" />}
+                  isActive={pathname.startsWith("/properties")}
+                >
+                  <Building2 />
+                  <span>Propiedades</span>
                 </SidebarMenuButton>
               </SidebarMenuItem>
             </SidebarMenu>
@@ -72,7 +89,7 @@ export function AppSidebar({
               {channelLinks.map(({ channel, label, icon: Icon }) => (
                 <SidebarMenuItem key={channel}>
                   <SidebarMenuButton
-                    render={<Link href={`/?channel=${channel}`} />}
+                    render={<a href={`/?channel=${channel}`} />}
                     isActive={pathname === "/" && activeChannel === channel}
                   >
                     <Icon />

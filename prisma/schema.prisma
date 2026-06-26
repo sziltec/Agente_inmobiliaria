@@ -107,6 +107,27 @@ model Message {
   @@index([conversationId])
 }
 
+// Una propiedad inmobiliaria publicada en el sitio (la carga el agente desde el dashboard).
+model Property {
+  id            String     @id @default(cuid())
+  title         String
+  description   String     @db.Text
+  operation     Operation
+  propertyType  String // casa, departamento, terreno, local...
+  zone          String
+  price         Int
+  bedrooms      Int?
+  bathrooms     Int?
+  areaM2        Int?
+  coverPhotoUrl String
+  featured      Boolean    @default(false)
+  createdAt     DateTime   @default(now())
+  updatedAt     DateTime   @updatedAt
+
+  @@index([operation])
+  @@index([zone])
+}
+
 // Eventos para alimentar el dashboard de estadísticas.
 // Ej: "chat_opened", "message_received", "lead_qualified".
 model Event {
