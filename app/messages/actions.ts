@@ -46,6 +46,16 @@ export async function sendMessage(
   return {};
 }
 
+export async function setBotEnabled(conversationId: string, enabled: boolean) {
+  await db.conversation.update({
+    where: { id: conversationId },
+    data: { botEnabled: enabled },
+  });
+
+  revalidatePath(`/messages/${conversationId}`);
+  revalidatePath("/messages");
+}
+
 export async function deleteConversation(conversationId: string) {
   // Los mensajes tienen ON DELETE RESTRICT hacia la conversación: hay que
   // borrarlos primero, en la misma transacción.

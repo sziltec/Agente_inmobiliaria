@@ -88,6 +88,10 @@ export async function handleInboundMessage(msg: NormalizedMessage): Promise<void
     data: { type: "message_received", channel: msg.channel, conversationId: conversation.id },
   });
 
+  // Si un humano apagó el bot para esta conversación, guardamos el mensaje
+  // entrante pero no generamos ni enviamos una respuesta automática.
+  if (!conversation.botEnabled) return;
+
   // --- 5. Reconstruir el historial de la conversación para el agente ---
   const rows = await db.message.findMany({
     where: { conversationId: conversation.id },

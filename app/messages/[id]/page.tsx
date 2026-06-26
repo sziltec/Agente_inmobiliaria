@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import { getConversation } from "@/lib/messages";
 import { LeadAvatar } from "@/components/lead-avatar";
 import { ConversationMenu } from "@/components/conversation-menu";
+import { ConversationBotToggle } from "@/components/conversation-bot-toggle";
 import { MessageComposer } from "@/components/message-composer";
 
 export default async function MessageDetailPage({
@@ -29,7 +30,10 @@ export default async function MessageDetailPage({
             </div>
           </div>
         </div>
-        <ConversationMenu conversationId={id} />
+        <div className="flex items-center gap-4">
+          <ConversationBotToggle conversationId={id} initialEnabled={conv.botEnabled} />
+          <ConversationMenu conversationId={id} />
+        </div>
       </div>
 
       <div className="flex-1 overflow-y-auto p-6">
