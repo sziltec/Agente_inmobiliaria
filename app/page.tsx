@@ -1,6 +1,7 @@
 // Dashboard principal: estadísticas y bandeja de chats.
 import Link from "next/link";
-import { Inbox, BadgeCheck, MessageCircle, Send } from "lucide-react";
+import { Inbox, BadgeCheck } from "lucide-react";
+import { SiWhatsapp, SiMessenger, SiInstagram } from "react-icons/si";
 import { getStats } from "@/lib/stats";
 import { timeAgo } from "@/lib/utils";
 import { DashboardTopbar } from "@/components/dashboard-topbar";
@@ -40,6 +41,20 @@ const statusNames: Record<string, string> = {
 
 type ValidChannel = "WHATSAPP" | "MESSENGER" | "INSTAGRAM";
 const validChannels: ValidChannel[] = ["WHATSAPP", "MESSENGER", "INSTAGRAM"];
+
+function MessengerInstagramIcon({
+  className,
+}: {
+  className?: string;
+  style?: React.CSSProperties;
+}) {
+  return (
+    <span className="flex items-center gap-0.5">
+      <SiMessenger className={className} style={{ color: "#0084FF" }} />
+      <SiInstagram className={className} style={{ color: "#E1306C" }} />
+    </span>
+  );
+}
 
 export default async function Dashboard({
   searchParams,
@@ -87,7 +102,8 @@ export default async function Dashboard({
           <StatCard
             label="WhatsApp"
             value={stats.chatsByChannel.WHATSAPP || 0}
-            icon={MessageCircle}
+            icon={SiWhatsapp}
+            iconColor="#25D366"
           />
           <StatCard
             label="Messenger + IG"
@@ -95,7 +111,7 @@ export default async function Dashboard({
               (stats.chatsByChannel.MESSENGER || 0) +
               (stats.chatsByChannel.INSTAGRAM || 0)
             }
-            icon={Send}
+            icon={MessengerInstagramIcon}
           />
         </div>
 

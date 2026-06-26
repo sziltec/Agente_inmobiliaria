@@ -1,17 +1,21 @@
-import type { LucideIcon } from "lucide-react";
+import type { ComponentType } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
+
+type IconComponent = ComponentType<{ className?: string; style?: React.CSSProperties }>;
 
 export function StatCard({
   label,
   value,
   icon: Icon,
   accent = false,
+  iconColor,
 }: {
   label: string;
   value: number | string;
-  icon: LucideIcon;
+  icon: IconComponent;
   accent?: boolean;
+  iconColor?: string;
 }) {
   return (
     <Card>
@@ -26,7 +30,7 @@ export function StatCard({
             accent ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground",
           )}
         >
-          <Icon className="size-5" />
+          <Icon className="size-5" style={iconColor ? { color: iconColor } : undefined} />
         </div>
       </CardContent>
     </Card>

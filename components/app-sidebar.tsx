@@ -3,7 +3,8 @@
 // Barra lateral de navegación: resumen general + accesos por canal.
 import Link from "next/link";
 import { usePathname, useSearchParams } from "next/navigation";
-import { House, LayoutDashboard, MessageCircle, Send, Camera } from "lucide-react";
+import { House, LayoutDashboard } from "lucide-react";
+import { SiWhatsapp, SiMessenger, SiInstagram } from "react-icons/si";
 import {
   Sidebar,
   SidebarContent,
@@ -18,9 +19,9 @@ import {
 } from "@/components/ui/sidebar";
 
 const channelLinks = [
-  { channel: "WHATSAPP", label: "WhatsApp", icon: MessageCircle },
-  { channel: "MESSENGER", label: "Messenger", icon: Send },
-  { channel: "INSTAGRAM", label: "Instagram", icon: Camera },
+  { channel: "WHATSAPP", label: "WhatsApp", icon: SiWhatsapp, color: "#25D366" },
+  { channel: "MESSENGER", label: "Messenger", icon: SiMessenger, color: "#0084FF" },
+  { channel: "INSTAGRAM", label: "Instagram", icon: SiInstagram, color: "#E1306C" },
 ];
 
 export function AppSidebar({
@@ -68,13 +69,13 @@ export function AppSidebar({
           <SidebarGroupLabel>Canales</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
-              {channelLinks.map(({ channel, label, icon: Icon }) => (
+              {channelLinks.map(({ channel, label, icon: Icon, color }) => (
                 <SidebarMenuItem key={channel}>
                   <SidebarMenuButton
                     render={<Link href={`/?channel=${channel}`} />}
                     isActive={pathname === "/" && activeChannel === channel}
                   >
-                    <Icon />
+                    <Icon style={{ color }} />
                     <span>{label}</span>
                   </SidebarMenuButton>
                   {channelCounts[channel] ? (
