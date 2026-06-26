@@ -42,16 +42,11 @@ const statusNames: Record<string, string> = {
 type ValidChannel = "WHATSAPP" | "MESSENGER" | "INSTAGRAM";
 const validChannels: ValidChannel[] = ["WHATSAPP", "MESSENGER", "INSTAGRAM"];
 
-function MessengerInstagramIcon({
-  className,
-}: {
-  className?: string;
-  style?: React.CSSProperties;
-}) {
+function MessengerInstagramIcon({ className }: { className?: string }) {
   return (
     <span className="flex items-center gap-0.5">
-      <SiMessenger className={className} style={{ color: "#0084FF" }} />
-      <SiInstagram className={className} style={{ color: "#E1306C" }} />
+      <SiMessenger className={className} />
+      <SiInstagram className={className} />
     </span>
   );
 }
@@ -103,7 +98,6 @@ export default async function Dashboard({
             label="WhatsApp"
             value={stats.chatsByChannel.WHATSAPP || 0}
             icon={SiWhatsapp}
-            iconColor="#25D366"
           />
           <StatCard
             label="Messenger + IG"

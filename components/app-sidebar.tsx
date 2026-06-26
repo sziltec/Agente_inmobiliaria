@@ -19,9 +19,9 @@ import {
 } from "@/components/ui/sidebar";
 
 const channelLinks = [
-  { channel: "WHATSAPP", label: "WhatsApp", icon: SiWhatsapp, color: "#25D366" },
-  { channel: "MESSENGER", label: "Messenger", icon: SiMessenger, color: "#0084FF" },
-  { channel: "INSTAGRAM", label: "Instagram", icon: SiInstagram, color: "#E1306C" },
+  { channel: "WHATSAPP", label: "WhatsApp", icon: SiWhatsapp },
+  { channel: "MESSENGER", label: "Messenger", icon: SiMessenger },
+  { channel: "INSTAGRAM", label: "Instagram", icon: SiInstagram },
 ];
 
 export function AppSidebar({
@@ -69,13 +69,13 @@ export function AppSidebar({
           <SidebarGroupLabel>Canales</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
-              {channelLinks.map(({ channel, label, icon: Icon, color }) => (
+              {channelLinks.map(({ channel, label, icon: Icon }) => (
                 <SidebarMenuItem key={channel}>
                   <SidebarMenuButton
                     render={<Link href={`/?channel=${channel}`} />}
                     isActive={pathname === "/" && activeChannel === channel}
                   >
-                    <Icon style={{ color }} />
+                    <Icon />
                     <span>{label}</span>
                   </SidebarMenuButton>
                   {channelCounts[channel] ? (
