@@ -15,7 +15,7 @@ export function DashboardTopbar({
       <div className="flex items-center gap-2">
         <SidebarTrigger />
         <Separator orientation="vertical" className="h-5" />
-        <span className="text-sm text-muted-foreground">Dashboards</span>
+        <span className="text-sm text-muted-foreground">Tablas</span>
         <span className="text-sm text-muted-foreground">/</span>
         <span className="text-sm font-medium">{breadcrumb}</span>
       </div>

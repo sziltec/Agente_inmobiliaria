@@ -8,7 +8,7 @@
 // nativo la navegación es una recarga completa de página, pero funciona de
 // forma confiable.
 import { usePathname, useSearchParams } from "next/navigation";
-import { Building2, House, LayoutDashboard } from "lucide-react";
+import { Building2, House, LayoutDashboard, Users } from "lucide-react";
 import { SiWhatsapp, SiMessenger, SiInstagram } from "react-icons/si";
 import {
   Sidebar,
@@ -55,7 +55,7 @@ export function AppSidebar({
       </SidebarHeader>
       <SidebarContent>
         <SidebarGroup>
-          <SidebarGroupLabel>Dashboards</SidebarGroupLabel>
+          <SidebarGroupLabel>Tablas</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
               <SidebarMenuItem>
@@ -76,6 +76,15 @@ export function AppSidebar({
                 >
                   <Building2 />
                   <span>Propiedades</span>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+              <SidebarMenuItem>
+                <SidebarMenuButton
+                  render={<a href="/leads" />}
+                  isActive={pathname.startsWith("/leads")}
+                >
+                  <Users />
+                  <span>Prospectos</span>
                 </SidebarMenuButton>
               </SidebarMenuItem>
             </SidebarMenu>

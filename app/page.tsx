@@ -5,7 +5,9 @@ import { Inbox, BadgeCheck } from "lucide-react";
 import { SiWhatsapp, SiMessenger, SiInstagram } from "react-icons/si";
 import { getStats } from "@/lib/stats";
 import { timeAgo } from "@/lib/utils";
+import { channelNames, statusNames } from "@/lib/labels";
 import { DashboardTopbar } from "@/components/dashboard-topbar";
+import { ChannelTabs } from "@/components/channel-tabs";
 import { StatCard } from "@/components/stat-card";
 import { LeadsDonutChart } from "@/components/leads-donut-chart";
 import { MessagesAreaChart } from "@/components/messages-area-chart";
@@ -29,19 +31,6 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-
-const channelNames: Record<string, string> = {
-  WHATSAPP: "WhatsApp",
-  MESSENGER: "Messenger",
-  INSTAGRAM: "Instagram",
-};
-
-const statusNames: Record<string, string> = {
-  NEW: "Nuevo",
-  QUALIFYING: "Cualificando",
-  QUALIFIED: "Cualificado",
-  DISQUALIFIED: "Descartado",
-};
 
 type ValidChannel = "WHATSAPP" | "MESSENGER" | "INSTAGRAM";
 const validChannels: ValidChannel[] = ["WHATSAPP", "MESSENGER", "INSTAGRAM"];
@@ -81,14 +70,9 @@ export default async function Dashboard({
     <>
       <DashboardTopbar breadcrumb={breadcrumb} notifications={notifications} />
       <div className="flex flex-1 flex-col gap-6 p-6">
-        <div>
-          <h1 className="text-2xl font-semibold">
-            {channel ? `Conversaciones de ${channelNames[channel]}` : "Resumen"}
-          </h1>
-          <p className="text-sm text-muted-foreground">
-            Leads y conversaciones de tu agente inmobiliario.
-          </p>
-        </div>
+        <Suspense>
+          <ChannelTabs />
+        </Suspense>
 
         {/* Cards de estadísticas */}
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
