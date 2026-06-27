@@ -6,6 +6,7 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { db } from "@/lib/db";
 import { getAdapter } from "@/lib/channels";
+import { verifySession } from "@/lib/dal";
 
 // `error`: no se guardó nada (formulario inválido). `warning`: se guardó el
 // mensaje pero no se pudo entregar por el canal (el composer lo distingue
@@ -17,6 +18,8 @@ export async function sendMessage(
   _prevState: SendMessageState,
   formData: FormData,
 ): Promise<SendMessageState> {
+  await verifySession();
+
   const text = String(formData.get("text") ?? "").trim();
   if (!text) return { error: "Escribí un mensaje." };
 
@@ -47,6 +50,8 @@ export async function sendMessage(
 }
 
 export async function setBotEnabled(conversationId: string, enabled: boolean) {
+  await verifySession();
+
   await db.conversation.update({
     where: { id: conversationId },
     data: { botEnabled: enabled },
@@ -57,6 +62,8 @@ export async function setBotEnabled(conversationId: string, enabled: boolean) {
 }
 
 export async function deleteConversation(conversationId: string) {
+  await verifySession();
+
   // Los mensajes tienen ON DELETE RESTRICT hacia la conversación: hay que
   // borrarlos primero, en la misma transacción.
   await db.$transaction([

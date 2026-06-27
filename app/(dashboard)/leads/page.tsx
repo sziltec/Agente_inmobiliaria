@@ -1,10 +1,16 @@
 // Tabla de prospectos (leads) capturados por el agente.
 import { getLeads } from "@/lib/leads";
+import { getAgents } from "@/lib/agents";
+import { getCurrentUser } from "@/lib/dal";
 import { DashboardTopbar } from "@/components/dashboard-topbar";
 import { LeadsTable, type LeadRow } from "@/components/leads-table";
 
 export default async function LeadsPage() {
-  const leads = await getLeads();
+  const [leads, agents, currentUser] = await Promise.all([
+    getLeads(),
+    getAgents(),
+    getCurrentUser(),
+  ]);
 
   const rows: LeadRow[] = leads.map((lead) => ({
     id: lead.id,
@@ -15,9 +21,17 @@ export default async function LeadsPage() {
     channel: lead.channel,
     status: lead.status,
     operation: lead.operation,
+    propertyType: lead.propertyType,
     zone: lead.zone,
     budgetMin: lead.budgetMin,
     budgetMax: lead.budgetMax,
+    bedrooms: lead.bedrooms,
+    timeline: lead.timeline,
+    notes: lead.notes,
+    agentId: lead.agentId,
+    agentName: lead.agent?.name ?? null,
+    dealStatus: lead.dealStatus,
+    dealAmount: lead.dealAmount,
     createdAt: lead.createdAt.toISOString(),
     conversationId: lead.conversations[0]?.id ?? null,
   }));
@@ -32,7 +46,11 @@ export default async function LeadsPage() {
             Todos los leads que capturó el agente, con su estado de cualificación.
           </p>
         </div>
-        <LeadsTable data={rows} />
+        <LeadsTable
+          data={rows}
+          agents={agents.map((a) => ({ id: a.id, name: a.name }))}
+          isAdmin={currentUser?.role === "ADMIN"}
+        />
       </div>
     </>
   );

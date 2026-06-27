@@ -8,7 +8,15 @@
 // nativo la navegación es una recarga completa de página, pero funciona de
 // forma confiable.
 import { usePathname } from "next/navigation";
-import { Building2, House, LayoutDashboard, MessageSquare, Users } from "lucide-react";
+import {
+  BarChart3,
+  Building2,
+  House,
+  LayoutDashboard,
+  MessageSquare,
+  UserCog,
+  Users,
+} from "lucide-react";
 import {
   Sidebar,
   SidebarContent,
@@ -20,8 +28,11 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
+import { SidebarUserMenu } from "@/components/sidebar-user-menu";
 
-export function AppSidebar() {
+type SidebarUser = { name: string; email: string; role: "ADMIN" | "AGENT" };
+
+export function AppSidebar({ user }: { user: SidebarUser | null }) {
   const pathname = usePathname();
 
   return (
@@ -83,10 +94,31 @@ export function AppSidebar() {
                   <span>Mensajes</span>
                 </SidebarMenuButton>
               </SidebarMenuItem>
+              <SidebarMenuItem>
+                <SidebarMenuButton
+                  render={<a href="/estadisticas" />}
+                  isActive={pathname.startsWith("/estadisticas")}
+                >
+                  <BarChart3 />
+                  <span>Estadísticas</span>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+              {user?.role === "ADMIN" && (
+                <SidebarMenuItem>
+                  <SidebarMenuButton
+                    render={<a href="/agentes" />}
+                    isActive={pathname.startsWith("/agentes")}
+                  >
+                    <UserCog />
+                    <span>Agentes</span>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              )}
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
       </SidebarContent>
+      {user && <SidebarUserMenu name={user.name} email={user.email} role={user.role} />}
     </Sidebar>
   );
 }

@@ -3,7 +3,7 @@
 // Caja para responder manualmente una conversación desde el dashboard.
 import { useActionState, useEffect, useRef } from "react";
 import { Send } from "lucide-react";
-import { sendMessage, type SendMessageState } from "@/app/messages/actions";
+import { sendMessage, type SendMessageState } from "@/app/(dashboard)/messages/actions";
 import {
   InputGroup,
   InputGroupAddon,

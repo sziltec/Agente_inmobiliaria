@@ -3,8 +3,7 @@
 // Tabla de prospectos (leads): selección de filas, orden, filtro por email,
 // visibilidad de columnas y paginación (mismo patrón que la tabla de pagos
 // de shadcn, con los datos de los leads).
-import { useState } from "react";
-import Link from "next/link";
+import { useMemo, useState } from "react";
 import {
   type ColumnDef,
   type ColumnFiltersState,
@@ -17,11 +16,13 @@ import {
   getSortedRowModel,
   useReactTable,
 } from "@tanstack/react-table";
-import { ArrowUpDown, ChevronDown, MoreHorizontal } from "lucide-react";
-import type { Channel, LeadStatus, Operation } from "@prisma/client";
+import { ArrowUpDown, ChevronDown } from "lucide-react";
+import type { Channel, DealStatus, LeadStatus, Operation } from "@prisma/client";
 import { channelNames, statusNames, operationNames } from "@/lib/labels";
 import { timeAgo } from "@/lib/utils";
 import { LeadAvatar } from "@/components/lead-avatar";
+import { LeadAgentSelect } from "@/components/lead-agent-select";
+import { LeadRowActions } from "@/components/lead-row-actions";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -30,7 +31,6 @@ import {
   DropdownMenu,
   DropdownMenuCheckboxItem,
   DropdownMenuContent,
-  DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import {
@@ -51,9 +51,17 @@ export type LeadRow = {
   channel: Channel;
   status: LeadStatus;
   operation: Operation | null;
+  propertyType: string | null;
   zone: string | null;
   budgetMin: number | null;
   budgetMax: number | null;
+  bedrooms: number | null;
+  timeline: string | null;
+  notes: string | null;
+  agentId: string | null;
+  agentName: string | null;
+  dealStatus: DealStatus;
+  dealAmount: number | null;
   createdAt: string;
   conversationId: string | null;
 };
@@ -67,6 +75,7 @@ const columnLabels: Record<string, string> = {
   operation: "Operación",
   budget: "Presupuesto",
   zone: "Zona",
+  agent: "Agente",
   createdAt: "Creado",
 };
 
@@ -85,7 +94,14 @@ function formatBudget(min: number | null, max: number | null) {
   return `Hasta ${budgetFormatter.format(max!)}`;
 }
 
-const columns: ColumnDef<LeadRow>[] = [
+function buildColumns({
+  agents,
+  isAdmin,
+}: {
+  agents: { id: string; name: string }[];
+  isAdmin: boolean;
+}): ColumnDef<LeadRow>[] {
+  return [
   {
     id: "select",
     header: ({ table }) => (
@@ -198,6 +214,22 @@ const columns: ColumnDef<LeadRow>[] = [
     cell: ({ row }) => row.original.zone || "—",
   },
   {
+    id: "agent",
+    header: "Agente",
+    cell: ({ row }) => {
+      const lead = row.original;
+      if (!isAdmin) return lead.agentName || "Sin asignar";
+      return (
+        <LeadAgentSelect
+          leadId={lead.id}
+          channel={lead.channel}
+          agentId={lead.agentId}
+          agents={agents}
+        />
+      );
+    },
+  },
+  {
     accessorKey: "createdAt",
     header: "Creado",
     cell: ({ row }) => (
@@ -207,37 +239,25 @@ const columns: ColumnDef<LeadRow>[] = [
   {
     id: "actions",
     enableHiding: false,
-    cell: ({ row }) => {
-      const lead = row.original;
-      return (
-        <DropdownMenu>
-          <DropdownMenuTrigger render={<Button variant="ghost" size="icon-sm" />}>
-            <span className="sr-only">Abrir menú</span>
-            <MoreHorizontal />
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            {lead.email && (
-              <DropdownMenuItem onClick={() => navigator.clipboard.writeText(lead.email!)}>
-                Copiar email
-              </DropdownMenuItem>
-            )}
-            {lead.conversationId && (
-              <DropdownMenuItem render={<Link href={`/messages/${lead.conversationId}`} />}>
-                Ver conversación
-              </DropdownMenuItem>
-            )}
-          </DropdownMenuContent>
-        </DropdownMenu>
-      );
-    },
+    cell: ({ row }) => <LeadRowActions lead={row.original} />,
   },
-];
+  ];
+}
 
-export function LeadsTable({ data }: { data: LeadRow[] }) {
+export function LeadsTable({
+  data,
+  agents,
+  isAdmin,
+}: {
+  data: LeadRow[];
+  agents: { id: string; name: string }[];
+  isAdmin: boolean;
+}) {
   const [sorting, setSorting] = useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
   const [rowSelection, setRowSelection] = useState({});
+  const columns = useMemo(() => buildColumns({ agents, isAdmin }), [agents, isAdmin]);
 
   const table = useReactTable({
     data,

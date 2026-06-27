@@ -7,6 +7,7 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { db } from "@/lib/db";
 import { getSupabaseAdmin, PROPERTIES_BUCKET } from "@/lib/supabase";
+import { verifySession } from "@/lib/dal";
 
 export type CreatePropertyState = { error?: string };
 
@@ -14,6 +15,8 @@ export async function createProperty(
   _prevState: CreatePropertyState,
   formData: FormData,
 ): Promise<CreatePropertyState> {
+  await verifySession();
+
   const title = String(formData.get("title") ?? "").trim();
   const description = String(formData.get("description") ?? "").trim();
   const operation = String(formData.get("operation") ?? "");

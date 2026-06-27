@@ -41,6 +41,19 @@ enum Operation {
   RENT
 }
 
+// Rol de un usuario del dashboard.
+enum UserRole {
+  ADMIN
+  AGENT
+}
+
+// Resultado comercial de un lead.
+enum DealStatus {
+  OPEN
+  WON
+  LOST
+}
+
 // Un cliente potencial. Se crea/actualiza a medida que el agente lo cualifica.
 model Lead {
   id           String      @id @default(cuid())
@@ -65,6 +78,11 @@ model Lead {
   notes        String? // resumen libre del agente
   // Para exportar a un CRM en el futuro
   exportedToCrm Boolean    @default(false)
+  // Agente asignado y resultado comercial.
+  agentId      String?
+  agent        Profile?    @relation("LeadAgent", fields: [agentId], references: [id])
+  dealStatus   DealStatus  @default(OPEN)
+  dealAmount   Int?
   createdAt    DateTime    @default(now())
   updatedAt    DateTime    @updatedAt
 
@@ -72,6 +90,8 @@ model Lead {
 
   @@unique([channel, externalId])
   @@index([status])
+  @@index([agentId])
+  @@index([dealStatus])
 }
 
 // Un hilo de conversación con un usuario en un canal concreto.
@@ -147,4 +167,19 @@ model Event {
   @@index([type])
   @@index([channel])
   @@index([createdAt])
+}
+
+// Usuario del dashboard (dueño de agencia o agente). Espejo de un usuario de
+// Supabase Auth: el id es el mismo UUID que devuelve Supabase, no se genera
+// acá. Se crea desde el server action que da de alta agentes.
+model Profile {
+  id        String   @id
+  email     String
+  name      String
+  role      UserRole @default(AGENT)
+  createdAt DateTime @default(now())
+
+  assignedLeads Lead[] @relation("LeadAgent")
+
+  @@index([role])
 }

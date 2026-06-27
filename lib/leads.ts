@@ -5,6 +5,7 @@ export async function getLeads() {
   return db.lead.findMany({
     orderBy: { createdAt: "desc" },
     include: {
+      agent: { select: { id: true, name: true } },
       conversations: {
         orderBy: { lastMessageAt: "desc" },
         take: 1,

@@ -2,7 +2,7 @@
 
 // Formulario para publicar una propiedad nueva (con foto de portada).
 import { useActionState, useState } from "react";
-import { createProperty, type CreatePropertyState } from "@/app/properties/actions";
+import { createProperty, type CreatePropertyState } from "@/app/(dashboard)/properties/actions";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";

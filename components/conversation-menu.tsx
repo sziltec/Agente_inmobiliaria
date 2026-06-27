@@ -2,7 +2,7 @@
 
 // Menú de opciones del encabezado de una conversación (Mensajes).
 import { MoreVertical, Trash2 } from "lucide-react";
-import { deleteConversation } from "@/app/messages/actions";
+import { deleteConversation } from "@/app/(dashboard)/messages/actions";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,

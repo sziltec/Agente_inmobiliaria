@@ -16,3 +16,14 @@ export const operationNames: Record<string, string> = {
   BUY: "Compra",
   RENT: "Alquiler",
 };
+
+export const roleNames: Record<string, string> = {
+  ADMIN: "Administrador",
+  AGENT: "Agente",
+};
+
+export const dealStatusNames: Record<string, string> = {
+  OPEN: "Abierto",
+  WON: "Ganado",
+  LOST: "Perdido",
+};

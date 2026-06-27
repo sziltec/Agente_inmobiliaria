@@ -3,7 +3,7 @@
 // Switch del encabezado de una conversación: prende/apaga el agente IA para
 // que un humano pueda tomar el chat por su cuenta sin que el bot responda.
 import { useState, useTransition } from "react";
-import { setBotEnabled } from "@/app/messages/actions";
+import { setBotEnabled } from "@/app/(dashboard)/messages/actions";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 
