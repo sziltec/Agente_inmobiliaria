@@ -7,11 +7,12 @@ export type LeadData = {
   name?: string;
   phone?: string;
   email?: string;
-  operation?: "BUY" | "RENT";
+  operation?: "BUY" | "RENT" | "SELL" | "APPRAISAL";
   propertyType?: string;
   zone?: string;
   budgetMin?: number;
   budgetMax?: number;
+  budgetCurrency?: string;
   bedrooms?: number;
   timeline?: string;
   notes?: string;
@@ -34,8 +35,9 @@ export const updateLeadTool: OpenAI.Chat.Completions.ChatCompletionTool = {
         email: { type: "string", description: "Correo electrónico si lo da" },
         operation: {
           type: "string",
-          enum: ["BUY", "RENT"],
-          description: "Si quiere COMPRAR (BUY) o ALQUILAR (RENT)",
+          enum: ["BUY", "RENT", "SELL", "APPRAISAL"],
+          description:
+            "Operación: comprar (BUY), alquilar (RENT), vender (SELL) o tasar (APPRAISAL)",
         },
         propertyType: {
           type: "string",
@@ -44,6 +46,10 @@ export const updateLeadTool: OpenAI.Chat.Completions.ChatCompletionTool = {
         zone: { type: "string", description: "Zona, barrio o ciudad de interés" },
         budgetMin: { type: "integer", description: "Presupuesto mínimo (número, sin símbolos)" },
         budgetMax: { type: "integer", description: "Presupuesto máximo (número, sin símbolos)" },
+        budgetCurrency: {
+          type: "string",
+          description: "Moneda de presupuesto en código ISO, por ejemplo USD o UYU",
+        },
         bedrooms: { type: "integer", description: "Cantidad de dormitorios deseados" },
         timeline: {
           type: "string",
