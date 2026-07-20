@@ -55,6 +55,7 @@ export type LeadRow = {
   zone: string | null;
   budgetMin: number | null;
   budgetMax: number | null;
+  budgetCurrency: string | null;
   bedrooms: number | null;
   timeline: string | null;
   notes: string | null;
@@ -62,7 +63,7 @@ export type LeadRow = {
   agentName: string | null;
   dealStatus: DealStatus;
   dealAmount: number | null;
-  createdAt: string;
+  updatedAt: string;
   conversationId: string | null;
 };
 
@@ -76,22 +77,27 @@ const columnLabels: Record<string, string> = {
   budget: "Presupuesto",
   zone: "Zona",
   agent: "Agente",
-  createdAt: "Creado",
+  updatedAt: "Actividad",
 };
 
-const budgetFormatter = new Intl.NumberFormat("es-UY", {
-  style: "currency",
-  currency: "USD",
-  maximumFractionDigits: 0,
-});
-
-function formatBudget(min: number | null, max: number | null) {
+function formatBudget(
+  min: number | null,
+  max: number | null,
+  currency: string | null,
+) {
   if (min == null && max == null) return "—";
+  const safeCurrency =
+    currency && /^[A-Z]{3}$/.test(currency) ? currency : "USD";
+  const formatter = new Intl.NumberFormat("es-UY", {
+    style: "currency",
+    currency: safeCurrency,
+    maximumFractionDigits: 0,
+  });
   if (min != null && max != null) {
-    return `${budgetFormatter.format(min)} - ${budgetFormatter.format(max)}`;
+    return `${formatter.format(min)} - ${formatter.format(max)}`;
   }
-  if (min != null) return `Desde ${budgetFormatter.format(min)}`;
-  return `Hasta ${budgetFormatter.format(max!)}`;
+  if (min != null) return `Desde ${formatter.format(min)}`;
+  return `Hasta ${formatter.format(max!)}`;
 }
 
 function buildColumns({
@@ -206,7 +212,12 @@ function buildColumns({
   {
     id: "budget",
     header: "Presupuesto",
-    cell: ({ row }) => formatBudget(row.original.budgetMin, row.original.budgetMax),
+    cell: ({ row }) =>
+      formatBudget(
+        row.original.budgetMin,
+        row.original.budgetMax,
+        row.original.budgetCurrency,
+      ),
   },
   {
     accessorKey: "zone",
@@ -220,20 +231,27 @@ function buildColumns({
       const lead = row.original;
       if (!isAdmin) return lead.agentName || "Sin asignar";
       return (
-        <LeadAgentSelect
-          leadId={lead.id}
-          channel={lead.channel}
-          agentId={lead.agentId}
-          agents={agents}
-        />
+        <div className="flex flex-col gap-1">
+          <LeadAgentSelect
+            leadId={lead.id}
+            channel={lead.channel}
+            agentId={lead.agentId}
+            agents={agents}
+          />
+          {!lead.agentId && lead.agentName ? (
+            <span className="text-xs text-muted-foreground">
+              Sugerido: {lead.agentName}
+            </span>
+          ) : null}
+        </div>
       );
     },
   },
   {
-    accessorKey: "createdAt",
-    header: "Creado",
+    accessorKey: "updatedAt",
+    header: "Actividad",
     cell: ({ row }) => (
-      <span className="text-muted-foreground">{timeAgo(row.original.createdAt)}</span>
+      <span className="text-muted-foreground">{timeAgo(row.original.updatedAt)}</span>
     ),
   },
   {
