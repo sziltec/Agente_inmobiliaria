@@ -25,14 +25,15 @@ export default async function LeadsPage() {
     zone: lead.zone,
     budgetMin: lead.budgetMin,
     budgetMax: lead.budgetMax,
+    budgetCurrency: lead.budgetCurrency,
     bedrooms: lead.bedrooms,
     timeline: lead.timeline,
     notes: lead.notes,
     agentId: lead.agentId,
-    agentName: lead.agent?.name ?? null,
+    agentName: lead.agent?.name ?? lead.assignedAdvisorName ?? null,
     dealStatus: lead.dealStatus,
     dealAmount: lead.dealAmount,
-    createdAt: lead.createdAt.toISOString(),
+    updatedAt: lead.updatedAt.toISOString(),
     conversationId: lead.conversations[0]?.id ?? null,
   }));
 

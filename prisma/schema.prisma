@@ -39,6 +39,8 @@ enum LeadStatus {
 enum Operation {
   BUY
   RENT
+  SELL
+  APPRAISAL
 }
 
 // Rol de un usuario del dashboard.
@@ -56,35 +58,37 @@ enum DealStatus {
 
 // Un cliente potencial. Se crea/actualiza a medida que el agente lo cualifica.
 model Lead {
-  id           String      @id @default(cuid())
-  channel      Channel
+  id                  String     @id @default(cuid())
+  channel             Channel
   // Identificador del usuario en la plataforma (teléfono de WhatsApp, id de IG/Messenger).
-  externalId   String
-  name         String?
+  externalId          String
+  name                String?
   // Foto de perfil del lead en su red de origen (Messenger/Instagram la dan
   // por la Graph API; WhatsApp Cloud API no expone fotos por privacidad).
-  avatarUrl    String?
-  phone        String?
-  email        String?
-  status       LeadStatus  @default(NEW)
+  avatarUrl           String?
+  phone               String?
+  email               String?
+  status              LeadStatus @default(NEW)
   // Datos de cualificación
-  operation    Operation?
-  propertyType String? // casa, departamento, terreno, local...
-  zone         String? // zona / barrio / ciudad de interés
-  budgetMin    Int?
-  budgetMax    Int?
-  bedrooms     Int?
-  timeline     String? // "en 1 mes", "explorando", etc.
-  notes        String? // resumen libre del agente
+  operation           Operation?
+  propertyType        String? // casa, departamento, terreno, local...
+  zone                String? // zona / barrio / ciudad de interés
+  budgetMin           Int?
+  budgetMax           Int?
+  budgetCurrency      String?
+  bedrooms            Int?
+  timeline            String? // "en 1 mes", "explorando", etc.
+  notes               String? // resumen libre del agente
+  assignedAdvisorName String? // asesor sugerido por las reglas comerciales
   // Para exportar a un CRM en el futuro
-  exportedToCrm Boolean    @default(false)
+  exportedToCrm       Boolean    @default(false)
   // Agente asignado y resultado comercial.
-  agentId      String?
-  agent        Profile?    @relation("LeadAgent", fields: [agentId], references: [id])
-  dealStatus   DealStatus  @default(OPEN)
-  dealAmount   Int?
-  createdAt    DateTime    @default(now())
-  updatedAt    DateTime    @updatedAt
+  agentId             String?
+  agent               Profile?   @relation("LeadAgent", fields: [agentId], references: [id])
+  dealStatus          DealStatus @default(OPEN)
+  dealAmount          Int?
+  createdAt           DateTime   @default(now())
+  updatedAt           DateTime   @updatedAt
 
   conversations Conversation[]
 
@@ -96,16 +100,16 @@ model Lead {
 
 // Un hilo de conversación con un usuario en un canal concreto.
 model Conversation {
-  id             String    @id @default(cuid())
+  id             String   @id @default(cuid())
   channel        Channel
   externalUserId String // mismo valor que Lead.externalId
-  lead           Lead?     @relation(fields: [leadId], references: [id])
+  lead           Lead?    @relation(fields: [leadId], references: [id])
   leadId         String?
-  status         String    @default("open") // "open" | "closed"
+  status         String   @default("open") // "open" | "closed"
   // Si está apagado, el agente IA no responde: un humano tomó la conversación.
-  botEnabled     Boolean   @default(true)
-  lastMessageAt  DateTime  @default(now())
-  createdAt      DateTime  @default(now())
+  botEnabled     Boolean  @default(true)
+  lastMessageAt  DateTime @default(now())
+  createdAt      DateTime @default(now())
 
   messages Message[]
   events   Event[]
@@ -117,26 +121,26 @@ model Conversation {
 
 // Cada mensaje individual de una conversación.
 model Message {
-  id             String       @id @default(cuid())
-  conversation   Conversation @relation(fields: [conversationId], references: [id])
-  conversationId String
-  direction      Direction
-  content        String       @db.Text
+  id                String       @id @default(cuid())
+  conversation      Conversation @relation(fields: [conversationId], references: [id])
+  conversationId    String
+  direction         Direction
+  content           String       @db.Text
   // Id del mensaje en la plataforma (WhatsApp/Meta). Sirve para no procesar
   // dos veces el mismo mensaje si Meta lo reenvía.
-  providerMessageId String?   @unique
+  providerMessageId String?      @unique
   // Carga útil original del webhook (por si necesitamos depurar).
-  raw            Json?
-  createdAt      DateTime     @default(now())
+  raw               Json?
+  createdAt         DateTime     @default(now())
 
   @@index([conversationId])
 }
 
 // Una propiedad inmobiliaria publicada en el sitio (la carga el agente desde el dashboard).
 model Property {
-  id            String     @id @default(cuid())
+  id            String    @id @default(cuid())
   title         String
-  description   String     @db.Text
+  description   String    @db.Text
   operation     Operation
   propertyType  String // casa, departamento, terreno, local...
   zone          String
@@ -145,9 +149,9 @@ model Property {
   bathrooms     Int?
   areaM2        Int?
   coverPhotoUrl String
-  featured      Boolean    @default(false)
-  createdAt     DateTime   @default(now())
-  updatedAt     DateTime   @updatedAt
+  featured      Boolean   @default(false)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
 
   @@index([operation])
   @@index([zone])

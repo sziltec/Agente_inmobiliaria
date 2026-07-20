@@ -15,6 +15,8 @@ export const statusNames: Record<string, string> = {
 export const operationNames: Record<string, string> = {
   BUY: "Compra",
   RENT: "Alquiler",
+  SELL: "Venta",
+  APPRAISAL: "Tasación",
 };
 
 export const roleNames: Record<string, string> = {
