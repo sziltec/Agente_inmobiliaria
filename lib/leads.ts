@@ -3,7 +3,7 @@ import { db } from "@/lib/db";
 
 export async function getLeads() {
   return db.lead.findMany({
-    orderBy: { createdAt: "desc" },
+    orderBy: { updatedAt: "desc" },
     include: {
       agent: { select: { id: true, name: true } },
       conversations: {
