@@ -9,7 +9,8 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 
-const publicRoutes = ["/login"];
+const publicRoutes = ["/login", "/forgot-password", "/auth/callback"];
+const authEntryRoutes = ["/login", "/forgot-password"];
 
 export async function proxy(request: NextRequest) {
   let response = NextResponse.next({ request });
@@ -42,7 +43,7 @@ export async function proxy(request: NextRequest) {
   if (!data.user && !isPublicRoute) {
     return NextResponse.redirect(new URL("/login", request.url));
   }
-  if (data.user && isPublicRoute) {
+  if (data.user && authEntryRoutes.includes(path)) {
     return NextResponse.redirect(new URL("/", request.url));
   }
 

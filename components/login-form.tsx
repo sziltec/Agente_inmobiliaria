@@ -2,6 +2,7 @@
 
 // Formulario de login del dashboard.
 import { useActionState } from "react";
+import Link from "next/link";
 import { login, type LoginState } from "@/app/(auth)/login/actions";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -31,6 +32,13 @@ export function LoginForm() {
       {state.error && <p className="text-sm text-destructive">{state.error}</p>}
       <Button type="submit" className="w-full" disabled={pending}>
         {pending ? "Ingresando..." : "Ingresar"}
+      </Button>
+      <Button
+        variant="link"
+        className="w-full"
+        render={<Link href="/forgot-password" />}
+      >
+        Olvidé mi contraseña
       </Button>
     </form>
   );
