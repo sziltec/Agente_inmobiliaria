@@ -8,8 +8,14 @@ import { runAgentTurn, type ChatMessage } from "@/lib/agent/agent";
 import type { LeadData } from "@/lib/agent/types";
 import { getAdapter } from "@/lib/channels";
 import type { NormalizedMessage } from "@/lib/channels/types";
+import { getSettings, isChannelEnabled } from "@/lib/settings";
 
 export async function handleInboundMessage(msg: NormalizedMessage): Promise<void> {
+  // --- 0. Configuración global: si el canal está apagado desde el panel de
+  // Configuración, ignoramos el mensaje por completo (ni lo registramos). ---
+  const settings = await getSettings();
+  if (!isChannelEnabled(settings, msg.channel)) return;
+
   // --- 1. Lead (cliente potencial): crear o actualizar ---
   const lead = await db.lead.upsert({
     where: {
@@ -91,6 +97,10 @@ export async function handleInboundMessage(msg: NormalizedMessage): Promise<void
   // Si un humano apagó el bot para esta conversación, guardamos el mensaje
   // entrante pero no generamos ni enviamos una respuesta automática.
   if (!conversation.botEnabled) return;
+
+  // Si el runtime global es Hermes, esta app no autorresponde: registró el
+  // mensaje entrante (para tener el historial) pero es Hermes quien contesta.
+  if (settings.runtime === "HERMES") return;
 
   // --- 5. Reconstruir el historial de la conversación para el agente ---
   const rows = await db.message.findMany({

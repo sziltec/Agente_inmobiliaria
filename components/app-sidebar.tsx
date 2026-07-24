@@ -14,6 +14,7 @@ import {
   House,
   LayoutDashboard,
   MessageSquare,
+  Settings,
   UserCog,
   Users,
 } from "lucide-react";
@@ -111,6 +112,18 @@ export function AppSidebar({ user }: { user: SidebarUser | null }) {
                   >
                     <UserCog />
                     <span>Agentes</span>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              )}
+              {user?.role === "ADMIN" && (
+                <SidebarMenuItem>
+                  <SidebarMenuButton
+                    // eslint-disable-next-line @next/next/no-html-link-for-pages -- ver comentario arriba
+                    render={<a href="/configuracion" />}
+                    isActive={pathname.startsWith("/configuracion")}
+                  >
+                    <Settings />
+                    <span>Configuración</span>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
               )}

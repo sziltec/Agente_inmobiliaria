@@ -56,6 +56,14 @@ enum DealStatus {
   LOST
 }
 
+// Quién maneja las respuestas automáticas de las conversaciones.
+//   GEMINI → esta app responde sola con el LLM (Gemini).
+//   HERMES → esta app solo registra los mensajes; Hermes responde por su cuenta.
+enum ConversationRuntime {
+  GEMINI
+  HERMES
+}
+
 // Un cliente potencial. Se crea/actualiza a medida que el agente lo cualifica.
 model Lead {
   id                  String     @id @default(cuid())
@@ -186,4 +194,16 @@ model Profile {
   assignedLeads Lead[] @relation("LeadAgent")
 
   @@index([role])
+}
+
+// Configuración global de la app (fila única, id fijo "global"). Controla,
+// desde el panel de Configuración, qué canales están activos y quién maneja
+// las conversaciones (esta app con Gemini, o Hermes).
+model Settings {
+  id               String              @id @default("global")
+  whatsappEnabled  Boolean             @default(true)
+  messengerEnabled Boolean             @default(true)
+  instagramEnabled Boolean             @default(true)
+  runtime          ConversationRuntime @default(GEMINI)
+  updatedAt        DateTime            @updatedAt
 }
